@@ -87,35 +87,6 @@
 #include <unistd.h>
 
 
-void fizik() {
-for(int j=0; j<3; j++){
-    for (int i = 1; i < 7; i++) {
-        if(j==0){
-            mvprintw(i, 1, "DARINA");
-            refresh();
-            clear();
-            sleep(1);
-        }
-        if(j==1){
-            mvprintw(7, 1, "DARINA");
-            mvprintw(i, 8, "YA");
-            refresh();
-            clear();
-            sleep(1);
-        }
-         if(j==2){
-            mvprintw(7, 8, "YA");
-            mvprintw(7, 1, "DARINA");
-            mvprintw(i, 11, "CHUT_Zanat");
-
-            refresh();
-            clear();
-            sleep(1);
-        }
-
-    }
-}
-}
 
 
 void map(){
@@ -162,8 +133,59 @@ refresh();
 endwin();
 }
 
+void test() {
+initscr();
+for(int j=0; j<3; j++){
+    for (int i = 1; i < 7; i++) {
+        if(j==0){
+            mvprintw(i, 1, "DONIL");
+            refresh();
+            clear();
+            sleep(1);
+        }
+        if(j==1){
+            mvprintw(7, 1, "DONIL");
+            mvprintw(i, 8, "POPY");
+            refresh();
+            clear();
+            sleep(1);
+        }
+         if(j==2){
+            mvprintw(7, 8, "POPY");
+            mvprintw(7, 1, "DONIL");
+            mvprintw(i, 11, "MbIL?");
+
+            refresh();
+            clear();
+            sleep(1);
+        }
+
+    }
+}
+endwin();
+}
+
+void fizik(){
+ initscr();
+int figure[4][4]={{1,1,1,1},{0, 0, 0, 0},{0, 0, 0, 0},{0, 0, 0, 0}};
+for(int i =0; i < 4; i++){
+    for (int j = 0; j < 4; j++)
+    {
+        if(figure[i][j] == 1){
+
+        mvprintw(i+1, j+1, "%d", figure[i][j]);
+        }
+        //printf("%d", figure[i][j]);
+    }
+    //printf("\n");
+}
+refresh();
+}
+    //mvprintw(7,8, figure);    
 
 int main(){
+fizik();
+//test();
 map();
 tablo_map();
 return 0;
