@@ -128,9 +128,9 @@ mvaddch(0,x, ACS_HLINE);
 mvaddch(20,x, ACS_HLINE);
 }
 //map();
- getch();
 refresh();
-endwin();
+//getch();
+//endwin();
 }
 
 void test() {
@@ -143,50 +143,80 @@ for(int j=0; j<3; j++){
             clear();
             sleep(1);
         }
-        if(j==1){
-            mvprintw(7, 1, "DONIL");
-            mvprintw(i, 8, "POPY");
-            refresh();
-            clear();
-            sleep(1);
-        }
-         if(j==2){
-            mvprintw(7, 8, "POPY");
-            mvprintw(7, 1, "DONIL");
-            mvprintw(i, 11, "MbIL?");
+        // if(j==1){
+        //     mvprintw(7, 1, "DONIL");
+        //     mvprintw(i, 8, "POPY");
+        //     refresh();
+        //     clear();
+        //     sleep(1);
+        // }
+        //  if(j==2){
+        //     mvprintw(7, 8, "POPY");
+        //     mvprintw(7, 1, "DONIL");
+        //     mvprintw(i, 11, "MbIL?");
 
-            refresh();
-            clear();
-            sleep(1);
-        }
+        //     refresh();
+        //     clear();
+        //     sleep(1);
+        // }
 
     }
 }
 endwin();
 }
 
-void fizik(){
- initscr();
-int figure[4][4]={{1,1,1,1},{0, 0, 0, 0},{0, 0, 0, 0},{0, 0, 0, 0}};
-for(int i =0; i < 4; i++){
-    for (int j = 0; j < 4; j++)
-    {
-        if(figure[i][j] == 1){
-
-        mvprintw(i+1, j+1, "%d", figure[i][j]);
-        }
-        //printf("%d", figure[i][j]);
-    }
-    //printf("\n");
-}
+// void fizik(){
+//  initscr();
+// int figure[4][4]={{1,1,1,1},{0, 0, 0, 0},{0, 0, 0, 0},{0, 0, 0, 0}};
+// for (int k = 0; k < 8; k++){
+// //tablo_map();
+// for(int i =0; i < 4; i++){
+//     for (int j = 0; j < 4; j++)
+//     {
+//         if(figure[i][j] == 1){
+//         mvprintw(i+1,j+k, "%d", figure[i][j]);
+//         }
+//     }
+// }
+//  //mvprintw(k,j+1, "%d", figure[i][j]);
+// map();
+// tablo_map();
+//         sleep(1);
+//         refresh();
+//         clear();
+// }
+// //refresh();
+// //endwin();
+// }
+void testm1(){ 
+initscr();
+for(int k = 0; k < 8; k++){
+fig(1, k);
 refresh();
+napms(500);
+//map();
+//tablo_map();
+clear(); 
 }
-    //mvprintw(7,8, figure);    
+endwin();
+}
+
+void fig(int x, int y){
+    int figure[4][4]={{1,1,1,1},{0, 0, 0, 0},{0, 0, 0, 0},{0, 0, 0, 0}};
+    for(int i = 0; i < 4;i++){
+        for(int j = 0; j < 4;j++){
+            if(figure[i][j] == 1){
+            mvprintw(i+y, j+x, "%d", figure[i][j]);
+            }
+        }
+    } 
+}
 
 int main(){
-fizik();
 //test();
-map();
-tablo_map();
+//map();
+//tablo_map();
+testm1();
+//fizik();
 return 0;
 }
