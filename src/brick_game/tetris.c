@@ -1,261 +1,264 @@
 #include "tetris.h"
-#include <stdlib.h>
-
-#define WIDTH 10
-#define HEIGHT 20
-
-  static GameInfo_t* temp = NULL;
-  static int ** old_massive;
-  static int ** new_massive;
 
 
-
-
-// typedef struct
-// {
-//     int x,y;
-//     int tick;
-//      int** figure;  
-// } TetFigure;
-
+GameInfo_t* create_game() {
+  GameInfo_t* game = (GameInfo_t*)malloc(sizeof(GameInfo_t));
+  game->field = (int**)calloc(HEIGHT, sizeof(int*));
+  game->next = (int**)calloc(HEIGHT, sizeof(int*));
+  for (int i = 0; i < HEIGHT; i++) {
+    game->field[i] = (int*)calloc(WIDTH, sizeof(int));
+    game->next[i] = (int*)calloc(WIDTH, sizeof(int));
+  }
+  game->score = 0;
+  game->high_score = 0;
+  game->level = 1;
+  game->speed = 1;
+  game->pause = 0;
+  return game;
+}
 
 TetFigure* create_figure() {
-    TetFigure* figure = (TetFigure*)malloc(sizeof(TetFigure));
-    figure->x = WIDTH / 2 - 2;  
-    figure->y = 1;               
-    figure->tick = 30;
-    figure->figure = (int**)calloc(4, sizeof(int*));
-    for (int i = 0; i < 4; i++) {
-        figure->figure[i] = (int*)calloc(4, sizeof(int));
-    }
-    return figure;
+  TetFigure* figure = (TetFigure*)malloc(sizeof(TetFigure));
+  figure->x = WIDTH / 2 - 2;
+  figure->y = 0;
+  figure->figure = (int**)calloc(4, sizeof(int*));
+  for (int i = 0; i < 4; i++) {
+    figure->figure[i] = (int*)calloc(4, sizeof(int));
+  }
+  return figure;
 }
 
-
-GameInfo_t *create_game() {
-    temp = (GameInfo_t*)malloc(sizeof(GameInfo_t));
-    temp->field = (int**)calloc(HEIGHT,sizeof(int*));
-    temp->next = (int**)calloc(HEIGHT,sizeof(int*));
-     old_massive =  (int**)calloc(HEIGHT,sizeof(int*));
-    new_massive = (int**)calloc(HEIGHT,sizeof(int*));
-    for(int i = 0; i < HEIGHT; i++){
-        temp->field[i] = (int*)calloc(WIDTH,sizeof(int));
-        temp->next[i] = (int*)calloc(WIDTH,sizeof(int));
-        old_massive[i]= (int*)calloc(WIDTH,sizeof(int));
-        new_massive[i] = (int*)calloc(WIDTH,sizeof(int));
-    }
-    // temp->is_place = true;
-    temp->score = 0;
-    temp->level = 1;
-    temp->speed = 1;
-    temp->pause = 0;
-    // temp->pos_x = 0;
-    // temp->pos_y = 0;
-    return temp;
+void free_memory(GameInfo_t* game, TetFigure* current_figure) {
+  for (int i = 0; i < HEIGHT; i++) {
+    free(game->field[i]);
+    free(game->next[i]);
+  }
+  free(game->field);
+  free(game->next);
+  free(game);
+  for (int i = 0; i < 4; i++) {
+    free(current_figure->figure[i]);
+  }
+  free(current_figure->figure);
+  free(current_figure);
 }
 
-void next_figure(GameInfo_t* temp, TetFigure* figure){
-        int figures[7][4][4] = {
-        {{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-        {{1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-        {{0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-        {{0, 1, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-        {{1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-        {{0, 0, 1, 1}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-        {{1, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
-    };
-    
-  
-
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            temp->field[i][j] = 0;
-        }
+void print_game(GameInfo_t* game, TetFigure* current_figure) {
+  for (int i = 0; i < HEIGHT; i++) {
+    for (int j = 0; j < WIDTH; j++) {
+      mvaddch(i + 1, j + 1, game->field[i][j] == 1 ? 'X' : '.');
     }
-    static  int rnd = 0;
-    static int flag = 1;
-      if (flag == 1) {
-        rnd = rand() % 7;
-        flag = 0;
+  }
+
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      if (current_figure->figure[i][j] == 1) {
+        mvaddch(current_figure->y + i + 1, current_figure->x + j + 1, 'X');
+      }
+      if (game->next[i][j] == 1) {
+        mvaddch(7 + i, 18 + j, 'X');
+      }
     }
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            figure->figure[i][j] = figures[rnd][i][j];
-        }
-    }
-//      for (int i = 0; i < ; i++) {
-//         for (int j = 0; j < 20; j++) {
-//             temp->field[i+temp->pos_x][j+temp->pos_y] = temp->next[i][j];
-//         }
-//     }
- }
-            // if (temp->field[i-temp->pos_x] > 0 &&  temp->field[j-temp->pos_y] > 0) {
-            //     temp->field[i-temp->pos_x][j-temp->pos_y] = 0;
-            // }
-
-// GameInfo_t* generate_matrix() {
-//             int figures[7][4][4] = {
-//         {{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-//         {{1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-//         {{0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-//         {{0, 1, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-//         {{1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-//         {{0, 0, 1, 1}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-//         {{1, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
-//     };
-//     static int rnd = 0;
-//     if(temp->is_place == true){
-//     rnd = rand() % 7;
-//     temp->is_place = false;
-//     }
-//   int start_y = temp->pos_y;
-//   int start_x = temp->pos_x;
-//   for (int i = 0; i < 20; i++) {
-//     for (int j = 0; j < 10; j++) {
-//       if (start_y <= i && i < (start_y + 4) && start_x <= j &&
-//           j < (start_x + 4)) {
-//         if (figures[rnd][i - start_y][j - start_x] == 1) {
-
-//           new_massive[j][i] = 1;
-//           // game->tmp->figure_rsrc[i - start_y][j - start_x];
-//         } else {
-//           new_massive[j][i] = 0;
-//         }
-//       } else {
-//         new_massive[j][i] = 0;
-//       }
-//     }
-//   }
-
-//   for (int i = 0; i < 10; i++) {
-//     for (int j = 0; j < 20; j++) {
-//       temp->field[j][i] =
-//           old_massive[j][i] == 1 || new_massive[j][i] == 1;
-//     }
-//   }
-// //   FILE *fp = fopen("r.txt", "w");
-// //  for (int i = 0; i < 10; i++) {
-// //         for (int j = 0; j < 20; j++) {
-// //             fprintf(fp, "%d ", old_massive->field[i][j]); // Записываем элемент массива
-// //         }
-// //         fprintf(fp, "\n");
-// //  }
-// //  fclose(fp);
-//   return temp;
-// }
-
-
-void print_game(GameInfo_t* game, TetFigure* current_figure) {    
-    
-    for (int i = 1; i < HEIGHT; i++) {
-        for (int j = 1; j < WIDTH; j++) {
-            if (game->field[i][j] == 1) {
-                mvaddch(i, j, 'X'); 
-            } else {
-                mvaddch(i, j, ' '); 
-            }
-        }
-    }
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (current_figure->figure[i][j] == 1) {
-                mvaddch(current_figure->y + i, current_figure->x + j, 'X'); 
-            }
-        }
-    }
+  }
+  mvprintw(3, 14, "Score: %d", game->score);
 }
 
-UserAction_t get_user_action(int ch) {
+void next_figure(GameInfo_t* game) {
+  int figures[7][4][4] = {
+      {{1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},  // I
+      {{1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},  // J
+      {{0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},  // L
+      {{0, 1, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},  // T
+      {{1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},  // S
+      {{0, 0, 1, 1}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},  // Z
+      {{1, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}   // O
+  };
 
-  switch (ch)
-  {
-  case KEY_LEFT: return Left;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      game->next[i][j] = 0;
+    }
+  }
 
-  case KEY_RIGHT: return Right;
+  int rnd = rand() % 7;
 
-  case KEY_UP: return Up;
-
-  case KEY_DOWN: return Down;
-
-  case 'p': return Pause;
-
-  case ' ': return Action;
-
-  default:
-    break;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      game->next[i][j] = figures[rnd][i][j];
+    }
   }
 }
 
-int collision(TetFigure* figure, GameInfo_t* game, int dx, int dy){
+void mv_next_figure(GameInfo_t* game, TetFigure* figure) {
+  figure->x = WIDTH / 2 - 2;
+  figure->y = 0;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      figure->figure[i][j] = game->next[i][j];
+      game->next[i][j] = 0;
+    }
+  }
+}
 
-  for(int i = 0; i < 4; i++){
-    for(int j = 0; j < 4; j++){
-      if(figure->figure[i][j]){
-        int new_x = figure->x + i + dx;
-        int new_y = figure->y + j + dy;
-        if(new_x < 0 || new_x >= WIDTH || new_y >= HEIGHT ||
-            new_y >= 0 && game->field[new_x][new_y]){
-            return 1;
-          }
+UserAction_t get_user_action(int ch) {
+  switch (ch) {
+    case KEY_LEFT:
+      return Left;
+    case KEY_RIGHT:
+      return Right;
+    case KEY_UP:
+      return Up;
+    case KEY_DOWN:
+      return Down;
+    case 'p':
+      return Pause;
+    case ' ':
+      return Action;
+    default:
+      return Terminate;
+  }
+}
+
+void move_figure(TetFigure* tet_figure, int dx, int dy) {
+  tet_figure->x += dx;
+  tet_figure->y += dy;
+}
+
+int check_collision(TetFigure* figure, GameInfo_t* game) {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      if (figure->figure[i][j]) {
+        int new_x = figure->x + j;
+        int new_y = figure->y + i;
+
+        if (new_x < 0 || new_x >= WIDTH || new_y >= HEIGHT) {
+          return 1;
+        }
+        if (new_y >= 0 && game->field[new_y][new_x] != 0) {
+          return 1;
+        }
       }
     }
   }
   return 0;
 }
 
-void move_figure(TetFigure* tet_figure, int dx, int dy) {
-   tet_figure->x = tet_figure->x + dx;
-    tet_figure->y = tet_figure->y + dy;
-}
-
-int check_collision(TetFigure* figure, GameInfo_t* game) {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (figure->figure[i][j]) {
-                int new_x = figure->x + j;
-                int new_y = figure->y + i;
-                // Проверка границ и столкновений с другими фигурами
-                if (new_x < 0 || new_x >= WIDTH || new_y >= HEIGHT || 
-                    (new_y >= 0 && game->field[new_y][new_x])) {
-                    return 1; // столкновение
-                }
-            }
-        }
+void fix_figure(GameInfo_t* game, TetFigure* tet_figure) {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      if (tet_figure->figure[i][j]) {
+        game->field[tet_figure->y + i][tet_figure->x + j] = 1;
+      }
     }
-    return 0; // нет столкновения
+  }
 }
 
+void transpouse(TetFigure* figure) {
+  int temp[4][4];
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      temp[i][j] = figure->figure[j][4 - 1 - i];
+    }
+  }
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      figure->figure[i][j] = temp[i][j];
+    }
+  }
+}
 
+void clear_line(GameInfo_t* game) {
+  int count_line = 0;
+  for (int row = 0; row < HEIGHT; row++) {
+    int isFull = 1;
+    for (int col = 0; col < WIDTH; col++) {
+      if (game->field[row][col] == 0) {
+        isFull = 0;
+        break;
+      }
+      if(col == 10)
+      count_line++;
+    }
 
+    if (isFull) {
+      for (int r = row; r > 0; r--) {
+        for (int c = 0; c < WIDTH; c++) {
+          game->field[r][c] = game->field[r - 1][c];
+        }
+      }
+      for (int c = 0; c < WIDTH; c++) {
+        game->field[0][c] = 0;
+      }
+      row--;
+      game->score += 100;
+      if (game->high_score < game->score)
+      game->high_score = game->score;
+      // if(count_line > 1)
+      // game->score+= count_line *
+    }
+  }
+}
 
+void move_down(TetFigure* temp, GameInfo_t* game) {
+  move_figure(temp, 0, 1);
+  if (check_collision(temp, game)) {
+    move_figure(temp, 0, -1);
+    fix_figure(game, temp);
+    clear_line(game);
+    mv_next_figure(game, temp);
+    next_figure(game);
+  }
+}
 
+void update_game(GameInfo_t* game, TetFigure* current_figure, int* game_over) {
+  move_down(current_figure, game);
+  if (check_collision(current_figure, game)) {
+    *game_over = 1;
+  }
+}
 
+void handle_user_input(int ch, TetFigure* figure, GameInfo_t* game) {
+  UserAction_t action = get_user_action(ch);
+  switch (action) {
+    case Down:
+      move_figure(figure, 0, 1);
+      if (check_collision(figure, game)) {
+        move_figure(figure, 0, -1);
+        fix_figure(game, figure);
+        clear_line(game);
+        mv_next_figure(game, figure);
+        next_figure(game);
+      }
+      break;
 
+    case Left:
+      move_figure(figure, -1, 0);
+      if (check_collision(figure, game)) {
+        move_figure(figure, 1, 0);
+      }
+      break;
 
+    case Right:
+      move_figure(figure, 1, 0);
+      if (check_collision(figure, game)) {
+        move_figure(figure, -1, 0);
+      }
+      break;
 
+    case Action:
+      transpouse(figure);
+      while (check_collision(figure, game)) {
+        transpouse(figure);
+      }
+      break;
 
+    default:
+      break;
+  }
+}
 
-
-
-// void moving(GameInfo_t *){
-
-// }
-
-// void transpouse(matrix_t* figure){
-// matrix_t temp;
-
-// for (int i = 0; i < 4; i++) {
-//         for (int j = 0; j < 4; j++) {
-//             temp.matrix[i][j] = figure->matrix[j][4 - 1 - i];
-//         }
-//     }
-//     // Копируем обратно в оригинальную матрицу
-//     for (int i = 0; i < 4; i++) {
-//         for (int j = 0; j < 4; j++) {
-//             figure->matrix[i][j] = temp.matrix[i][j];
-//         }
-//     }
-//  }
+GameInfo_t record_read() {
+FILE *fp = fopen("record.txt", "r");
+GameInfo_t *game = fputc(game->high_score, fp);
+fclose(fp);
+}

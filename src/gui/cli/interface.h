@@ -10,7 +10,7 @@
 #include <time.h>
 #include "../../brick_game/tetris.h"
 
-void map(GameInfo_t* game, TetFigure* figure);
+void map();
 
 
 
